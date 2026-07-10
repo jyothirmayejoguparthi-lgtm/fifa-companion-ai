@@ -1,0 +1,44 @@
+{
+  "stadium_name": "MetLife Stadium (FIFA World Cup 2026 - Demo Venue)",
+  "gates": [
+    {"id": "Gate A", "crowd_status": "High", "recommendation": "Use Gate C if possible", "wait_minutes": 22},
+    {"id": "Gate B", "crowd_status": "Medium", "recommendation": "Normal entry", "wait_minutes": 10},
+    {"id": "Gate C", "crowd_status": "Low", "recommendation": "Fastest entry route", "wait_minutes": 3},
+    {"id": "Gate D", "crowd_status": "Medium", "recommendation": "Emergency exit only during match", "wait_minutes": 8}
+  ],
+  "washrooms": [
+    {"location": "Near Section 12", "accessible": true, "gate_nearby": "Gate B"},
+    {"location": "Near Section 27", "accessible": true, "gate_nearby": "Gate C"},
+    {"location": "Near Section 5", "accessible": false, "gate_nearby": "Gate A"}
+  ],
+  "medical_centers": [
+    {"location": "Section 18", "hours": "24x7 during event days", "type": "Primary Medical Center"},
+    {"location": "Section 30", "hours": "Match days only", "type": "First Aid Kiosk"}
+  ],
+  "accessibility": {
+    "wheelchair_routes": ["Gate B ramp entrance", "Gate C elevator bank"],
+    "elevators": ["Section 10 elevator", "Section 25 elevator", "Section 40 elevator"],
+    "accessible_seating": ["Section 8", "Section 22", "Section 35"],
+    "assistance_desks": ["Main Concourse Desk", "Gate B Info Point"],
+    "sensory_room": {"location": "Near Section 15", "hours": "All match hours"}
+  },
+  "transportation": {
+    "metro": {"available": true, "nearest_station": "Stadium Metro Station", "walk_minutes": 5},
+    "bus": {"available": true, "routes": ["Route 12", "Route 45"], "drop_point": "North Plaza"},
+    "taxi_pickup": {"available": true, "location": "South Plaza Zone 3"},
+    "rideshare": {"available": true, "location": "East Lot Pickup Zone"},
+    "parking": {"available": true, "lots": ["Lot A - General", "Lot B - Accessible", "Lot C - VIP"]}
+  },
+  "emergency": {
+    "nearest_medical_center": "Section 18",
+    "emergency_exit": "Gate D",
+    "security_desk": "Near Main Entrance",
+    "emergency_hotline": "Stadium Control Room: ext. 4444",
+    "response_team": "24x7 Emergency Response Team on-site"
+  },
+  "staff_info": {
+    "volunteer_checkin": "Staff Gate E, Level 1",
+    "organizer_control_room": "Level 3, Operations Center",
+    "shift_handover_point": "Staff Lounge, Level 1"
+  }
+}
