@@ -3,6 +3,14 @@
 **Hack2Skill PromptWars Challenge 4** — A multimodal GenAI solution for stadium
 operations and fan experience during FIFA World Cup 2026.
 
+🌐 **Live App:**  
+https://fifa-companion-ai-8i6hmmcrcxkbymgzjcsshh.streamlit.app/
+
+💻 **GitHub Repository:**  
+https://github.com/jyothirmayejoguparthi-lgtm/fifa-companion-ai
+
+---
+
 This README is structured around the six evaluation categories so reviewers
 (human or automated) can verify each claim directly against the code.
 
