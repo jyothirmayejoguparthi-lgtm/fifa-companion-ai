@@ -142,16 +142,14 @@ fifa-assistant/
 - Push notifications for gate/wait-time changes
 - Persistent backend for incident logs (currently session-scoped for demo speed)
 - Native mobile TTS/STT instead of browser Web Speech API
-## Screenshots
-
 ### Home Dashboard
 ![Home Dashboard](screenshots/home_dashboard.png)
 
-### AI Assistant
-![AI Assistant](screenshots/ai_assistant.png)
+### Organizer Dashboard
+![Organizer Dashboard](screenshots/organizer_dashboard.png)
 
 ### Ticket Verification
-![Ticket Verification](screenshots/ticket_analysis.png)
+![Ticket Verification](screenshots/ticket_result.png)
 
 ### Incident Analysis - Upload
 ![Incident Upload](screenshots/incident_upload.png)
@@ -159,5 +157,5 @@ fifa-assistant/
 ### Incident Analysis - Result
 ![Incident Result](screenshots/incident_result.png)
 
-### Organizer Dashboard
-![Organizer Dashboard](screenshots/organizer_dashboard.png)
+### AI Assistant
+![AI Assistant](screenshots/ai_assistant.png)
