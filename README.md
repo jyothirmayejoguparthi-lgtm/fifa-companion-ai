@@ -35,6 +35,69 @@ deployment that pure text chat cannot cover:
 | Crowd management | `modules/crowd_status.py` — gate-by-gate live status + organizer analytics |
 | Emergency services | `modules/emergency.py` + `modules/incident_analysis.py` (photo-based triage) |
 
+## Fan Persona Focus
+
+While the platform supports Fans, Volunteers, Organizers, and Venue Staff, the primary focus is the FIFA fan experience.
+
+A common challenge during international sporting events is language barriers and information overload. Fans often need assistance with:
+
+- Finding the least crowded gate
+- Navigating the stadium
+- Accessing accessibility services
+- Locating transportation options
+- Receiving emergency guidance
+- Understanding ticket issues
+
+The AI Assistant automatically detects the language of the user's query and responds in the same language. Responses are designed to be explainable, helping users understand not only what action to take, but why the recommendation was made.
+
+Example:
+
+User:
+"أنا مشجع من السعودية ولا أتحدث الإنجليزية. كيف يمكنني الوصول إلى البوابة الأقل ازدحامًا؟"
+
+AI Response:
+"أنصحك باستخدام البوابة C لأنها الأقل ازدحامًا حاليًا بوقت انتظار يقارب 3 دقائق. هذا يساعدك على دخول الملعب بشكل أسرع وتجنب الطوابير الطويلة."
+
+## Explainable AI Design
+
+A major goal of this project is moving beyond information retrieval into reasoning-based assistance.
+
+Every AI workflow follows:
+
+Input → Reasoning → Action
+
+Examples:
+
+### Crowd Guidance
+Input:
+Current gate wait times
+
+Reasoning:
+Gate C has the shortest queue and lowest congestion level
+
+Action:
+Recommend Gate C and explain why
+
+### Ticket Verification
+Input:
+Ticket image
+
+Reasoning:
+Missing QR code and event mismatch detected
+
+Action:
+Recommend visiting a help desk before reaching the gate
+
+### Incident Analysis
+Input:
+Incident photo
+
+Reasoning:
+Visible injury and emergency response indicators detected
+
+Action:
+Escalate to medical staff and recommend immediate intervention
+
 ## 2. Accessibility
 
 Real, testable accessibility features — not a page describing accessibility:
@@ -64,7 +127,7 @@ pytest tests/ -v
 
 | File | Covers |
 |---|---|
-| `test_llm_client.py` | Claude text assistant, offline fallback, missing/broken API key handling |
+| `test_llm_client.py` | Gemini text assistant, multilingual responses, offline fallback, missing/broken API key handling |
 | `test_gemini_client.py` | Vision input validation, hashing, missing API key, missing dependency |
 | `test_i18n.py` | Translation correctness and English fallback |
 | `test_cache_utils.py` | Data integrity of the cached knowledge base |
@@ -74,7 +137,7 @@ pytest tests/ -v
 
 ## 5. Security
 
-- API keys (`ANTHROPIC_API_KEY`, `GEMINI_API_KEY`) read **only** from environment variables — never hardcoded, never logged, never echoed in responses (`utils/llm_client.py`, `utils/gemini_client.py`)
+- API keys (`GEMINI_API_KEY`) are read only from environment variables or Streamlit Secrets, never hardcoded, never logged, and never echoed in responses (`utils/llm_client.py`, `utils/gemini_client.py`)
 - Every external API call wrapped in `try/except`, enforced by `test_security.py`'s static scan
 - Image uploads validated for **file size (8MB cap)** and **MIME type allowlist** before any network call
 - `.gitignore` excludes `.env`, `__pycache__`, and virtual environments
@@ -93,10 +156,24 @@ pytest tests/ -v
 ## GenAI / Multimodal architecture
 
 ```
-Text queries  → utils/llm_client.py    → Anthropic Claude   (grounded on stadium_facts.json)
-Image uploads → utils/gemini_client.py → Google Gemini 2.5 Flash (Vision)
-                                            ├── modules/incident_analysis.py  (severity triage)
-                                            └── modules/ticket_scanner.py     (ticket field extraction)
+Text queries
+→ utils/llm_client.py
+→ Gemini 2.5 Flash
+
+Image uploads
+→ utils/gemini_client.py
+→ Gemini 2.5 Flash Vision
+
+    ├── modules/incident_analysis.py
+    │      Severity classification
+    │      Explainable reasoning
+    │      Action recommendations
+    │
+    └── modules/ticket_scanner.py
+           Ticket validation
+           Issue detection
+           Explainable recommendations
+
 ```
 
 Both clients follow the same reliability pattern: validate input → try the
@@ -107,7 +184,7 @@ API key and assert no exception propagates.
 
 To enable live calls:
 ```bash
-export ANTHROPIC_API_KEY="your-anthropic-key"
+
 export GEMINI_API_KEY="your-gemini-key"
 ```
 
@@ -124,7 +201,7 @@ streamlit run app.py
 fifa-assistant/
 ├── app.py                          # Entry point: routing, sidebar, accessibility injection
 ├── modules/
-│   ├── ai_assistant.py             # Claude-backed Q&A, chat history, TTS
+│   ├── ai_assistant.py             # Gemini-powered multilingual AI Assistant , chat history, TTS
 │   ├── crowd_status.py             # Gate status, organizer-only analytics
 │   ├── accessibility.py            # Real toolbar controls + info page
 │   ├── transportation.py           # Metro/bus/taxi/rideshare/parking
@@ -133,7 +210,7 @@ fifa-assistant/
 │   ├── ticket_scanner.py           # Gemini Vision ticket field extraction
 │   └── role_dashboard.py           # Volunteer/Organizer/Staff panels
 ├── utils/
-│   ├── llm_client.py               # Claude text client, cached, offline-safe
+│   ├── llm_client.py               # Gemini text client, multilingual and explainable, cached, offline-safe
 │   ├── gemini_client.py            # Gemini Vision + text client, cached, offline-safe
 │   ├── error_handling.py           # @safe_render decorator, input validation
 │   ├── i18n.py                     # 5-language translation layer
@@ -142,7 +219,22 @@ fifa-assistant/
 │   └── stadium_facts.json          # Grounding knowledge base
 ├── tests/                          # 47 tests across 7 files (see Section 4)
 └── requirements.txt
+
 ```
+## Dynamic Data Ingestion
+
+The platform is designed to reason over user-provided inputs rather than relying solely on static demonstrations.
+
+Examples include:
+
+- Ticket photos uploaded by users for verification
+- Incident photos uploaded for AI-powered safety analysis
+- User questions in multiple languages
+- Context-aware crowd and navigation requests
+- Session-based operational logs for incidents and ticket verification
+
+This allows evaluators to test the system using their own inputs, demonstrating that recommendations are generated dynamically rather than being hardcoded.
+
 
 ## Future scope
 
@@ -150,13 +242,25 @@ fifa-assistant/
 - Push notifications for gate/wait-time changes
 - Persistent backend for incident logs (currently session-scoped for demo speed)
 - Native mobile TTS/STT instead of browser Web Speech API
+
+## Screenshots
+
 ### Home Dashboard
 ![Home Dashboard](screenshots/home_dashboard.png)
+
+### AI Assistant
+![AI Assistant](screenshots/ai_assistant.png)
+
+### Crowd Status
+![Crowd Status](screenshots/crowd_status.png)
 
 ### Organizer Dashboard
 ![Organizer Dashboard](screenshots/organizer_dashboard.png)
 
-### Ticket Verification
+### Ticket Verification - Upload
+![Ticket Upload](screenshots/ticket_upload.png)
+
+### Ticket Verification - Result
 ![Ticket Verification](screenshots/ticket_result.png)
 
 ### Incident Analysis - Upload
@@ -164,6 +268,3 @@ fifa-assistant/
 
 ### Incident Analysis - Result
 ![Incident Result](screenshots/incident_result.png)
-
-### AI Assistant
-![AI Assistant](screenshots/ai_assistant.png)

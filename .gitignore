@@ -1,8 +1,27 @@
+# Python
 __pycache__/
 *.pyc
-.pytest_cache/
-.env
+*.pyo
+*.pyd
+
+# Virtual environments
 .venv/
 venv/
+
+# Environment variables
+.env
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Pytest
+.pytest_cache/
+
+# Build artifacts
 *.egg-info/
+build/
+dist/
+
+# OS files
 .DS_Store
+Thumbs.db

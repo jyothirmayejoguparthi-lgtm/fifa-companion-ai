@@ -17,26 +17,68 @@ def render(role: str, lang: str):
         return
 
     st.success(
-        f"Nearest Medical Center: {info.get('nearest_medical_center', 'N/A')}"
+        f"🏥 Nearest Medical Center: "
+        f"{info.get('nearest_medical_center', 'N/A')}"
     )
-    st.success(
-        f"Emergency Exit: {info.get('emergency_exit', 'N/A')}"
+
+    st.info(
+        "Reasoning: Medical teams can provide immediate treatment for "
+        "injuries, illness, dehydration, or other health emergencies."
     )
+
     st.success(
-        f"Security Help Desk: {info.get('security_desk', 'N/A')}"
+        f"🚪 Emergency Exit: "
+        f"{info.get('emergency_exit', 'N/A')}"
     )
+
+    st.info(
+        "Reasoning: Emergency exits provide the safest evacuation route "
+        "during security incidents, fire alarms, or crowd-control events."
+    )
+
     st.success(
-        f"{info.get('response_team', '24x7 Emergency Response Team Available')}"
+        f"🛡 Security Help Desk: "
+        f"{info.get('security_desk', 'N/A')}"
+    )
+
+    st.info(
+        "Reasoning: Security personnel can assist with safety concerns, "
+        "lost visitors, suspicious activity, and crowd management."
+    )
+
+    st.success(
+        f"🚑 {info.get('response_team', '24x7 Emergency Response Team Available')}"
+    )
+
+    st.info(
+        "Reasoning: Emergency response teams are trained to coordinate "
+        "medical, security, and operational incidents inside the stadium."
     )
 
     if role in ("Organizer", "Venue Staff"):
+        st.divider()
+
+        st.markdown("### 🏟 Operations Access")
+
+        st.success(
+            f"📞 Internal Hotline: "
+            f"{info.get('emergency_hotline', 'N/A')}"
+        )
+
         st.info(
-            f"📞 Internal hotline: {info.get('emergency_hotline', 'N/A')}"
+            "Reasoning: Internal hotlines provide direct access to the "
+            "Operations Center for faster incident escalation."
         )
 
     st.divider()
 
-    # Emergency page SOS button
+    st.markdown("### 🤖 Emergency Guidance")
+
+    st.warning(
+        "If you witness a serious medical issue, security threat, fire, "
+        "or crowd crush risk, activate SOS immediately and follow staff instructions."
+    )
+
     render_sos_button(lang, "page")
 
 
@@ -57,4 +99,8 @@ def render_sos_button(lang: str, key_suffix: str = "sidebar"):
         st.error(
             f"{t('sos_confirm', lang)} "
             f"(Logged at {st.session_state.sos_triggered_at})"
+        )
+
+        st.success(
+            "Emergency notification recorded and routed for immediate attention."
         )

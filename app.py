@@ -22,9 +22,11 @@ st.set_page_config(
 init_session_state()
 
 # ---------- Sidebar: role, language, accessibility controls, SOS ----------
+
 st.sidebar.markdown("## ⚽ FIFA Companion AI")
 
 role_options = ["Fan", "Volunteer", "Organizer", "Venue Staff"]
+
 st.session_state.role = st.sidebar.selectbox(
     t("select_role", st.session_state.lang),
     role_options,
@@ -38,6 +40,7 @@ lang_display = st.sidebar.selectbox(
     index=0,
     help="Changes the interface language and AI Assistant response language.",
 )
+
 st.session_state.lang = SUPPORTED_LANGUAGES[lang_display]
 st.session_state.lang_name = lang_display
 
@@ -45,36 +48,69 @@ accessibility.render_accessibility_toolbar(st.session_state.lang)
 accessibility.inject_accessibility_css()
 
 st.sidebar.divider()
-emergency.render_sos_button(st.session_state.lang, "sidebar")
+
+emergency.render_sos_button(
+    st.session_state.lang,
+    "sidebar"
+)
 
 # ---------- Main content ----------
+
 lang = st.session_state.lang
 role = st.session_state.role
-st.markdown("""
+
+st.markdown(
+    """
 # ⚽ FIFA Companion AI
 ### AI-Powered Smart Stadium Operations Platform
-""")
-st.caption(
-    "Helping FIFA World Cup 2026 fans, volunteers, organizers and venue staff "
-    "navigate stadiums, transportation, accessibility, crowd management and "
-    "emergency services — powered by GenAI."
+"""
 )
+
+st.caption(
+    "Helping FIFA World Cup 2026 fans overcome language barriers, navigate stadiums, "
+    "access accessibility services, avoid congestion, verify tickets, and receive "
+    "real-time AI-powered assistance. Volunteers, organizers, and venue staff are "
+    "supported through operational tools and incident management workflows."
+)
+
 col1, col2, col3, col4 = st.columns(4)
 
-col1.metric("🏟 Active Gates", "4")
-col2.metric("🚨 Incidents", len(st.session_state.get("incident_log", [])))
-col3.metric("👥 Crowd Alerts", "1")
-col4.metric("🎫 Tickets Scanned", len(st.session_state.get("ticket_log", [])))
-st.success("""
+col1.metric(
+    "🏟 Active Gates",
+    "4"
+)
+
+col2.metric(
+    "🚨 Incidents",
+    len(st.session_state.get("incident_log", []))
+)
+
+col3.metric(
+    "👥 Crowd Alerts",
+    len(st.session_state.get("incident_log", []))
+)
+
+col4.metric(
+    "🎫 Tickets Scanned",
+    len(st.session_state.get("ticket_log", []))
+)
+
+st.success(
+    """
 🤖 AI Systems Status
 
-✅ Claude Assistant Online
+✅ Gemini AI Assistant Online
 ✅ Gemini Vision Online
 ✅ Accessibility Active
 ✅ Emergency Response Active
-""")
-# Role-specific operational dashboard (empty for Fan)
+"""
+)
+
+# ---------- Role Dashboard ----------
+
 role_dashboard.render(role, lang)
+
+# ---------- Tabs ----------
 
 tab_labels = [
     t("nav_ai_assistant", lang),
@@ -85,29 +121,50 @@ tab_labels = [
     t("nav_incident", lang),
     t("nav_ticket", lang),
 ]
+
 tabs = st.tabs(tab_labels)
 
+# ---------- AI Assistant ----------
+
 with tabs[0]:
-    ai_assistant.render(role, lang, st.session_state.lang_name)
+    ai_assistant.render(
+        role,
+        lang,
+        st.session_state.lang_name
+    )
+
+# ---------- Crowd Status ----------
 
 with tabs[1]:
     crowd_status.render(role, lang)
 
+# ---------- Accessibility ----------
+
 with tabs[2]:
     accessibility.render(lang)
+
+# ---------- Transportation ----------
 
 with tabs[3]:
     transportation.render(lang)
 
+# ---------- Emergency ----------
+
 with tabs[4]:
     emergency.render(role, lang)
 
+# ---------- Incident Analysis ----------
+
 with tabs[5]:
     incident_analysis.render(role, lang)
+
     incident_analysis.render_incident_chart()
+
     if role in ("Organizer", "Venue Staff"):
         st.divider()
         incident_analysis.render_incident_log(lang)
+
+# ---------- Ticket Scanner ----------
 
 with tabs[6]:
     ticket_scanner.render(role, lang)
@@ -116,7 +173,10 @@ with tabs[6]:
 
     ticket_scanner.render_ticket_history()
 
+# ---------- Footer ----------
+
 st.divider()
+
 st.caption(
     "Built for Hack2Skill PromptWars Challenge 4 · FIFA World Cup 2026 "
     "Smart Stadium Assistant · Demo data, not affiliated with FIFA."

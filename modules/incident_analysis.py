@@ -3,10 +3,7 @@ Incident Analysis module — multimodal safety/operations tool.
 
 Fan, Volunteer, or Staff photographs an incident (spill, blocked exit,
 damaged equipment, overcrowding, medical situation) and Gemini Vision
-classifies severity + routes it to the correct team. This directly extends
-"Emergency Support" and "Crowd Status" into a GenAI-native workflow rather
-than static text, which is the single most literal interpretation of
-"GenAI-enabled solution ... during FIFA World Cup 2026" in the brief.
+classifies severity + routes it to the correct team.
 """
 
 import streamlit as st
@@ -16,14 +13,29 @@ from utils.gemini_client import analyze_image
 from utils.i18n import t
 
 INCIDENT_PROMPT = """You are a stadium safety triage assistant for FIFA World Cup 2026.
-Analyze this photo taken by a stadium visitor or staff member. Respond in this exact format:
+
+Analyze this photo taken by a stadium visitor or staff member.
+
+Respond in this EXACT format:
 
 SEVERITY: [Low/Medium/High/Critical]
+
 CATEGORY: [Medical/Security/Facilities/Overcrowding/Other]
+
 DESCRIPTION: [one sentence describing what you see]
+
+REASONING: [explain why you chose this severity and category based on visible evidence in the image]
+
 RECOMMENDED_ACTION: [one sentence on what stadium staff should do next]
 
-Be concise. If the image is unclear or unrelated to a stadium incident, say so honestly."""
+Instructions:
+- Be factual and honest.
+- Do not guess details that are not visible.
+- Base severity on visible evidence.
+- Explain your reasoning clearly.
+- Keep responses concise.
+- If the image is unclear or unrelated to a stadium incident, state that clearly.
+"""
 
 SEVERITY_COLOR = {
     "Critical": "🔴",
@@ -35,10 +47,10 @@ SEVERITY_COLOR = {
 
 def render(role: str, lang: str):
     st.markdown(f"### 📸 {t('nav_incident', lang)}")
+
     st.info(
         "Upload a photo of a safety issue, hazard, or incident. Our AI will "
-        "assess severity and route it to the right team — no need to describe "
-        "it in words."
+        "assess severity, explain its reasoning, and route it to the right team."
     )
 
     uploaded = st.file_uploader(
@@ -62,38 +74,60 @@ def render(role: str, lang: str):
             mime_type = uploaded.type or "image/jpeg"
 
             prompt = INCIDENT_PROMPT
+
             if notes.strip():
-                prompt += f"\n\nAdditional context from reporter: {notes.strip()}"
+                prompt += (
+                    f"\n\nAdditional context from reporter: {notes.strip()}"
+                )
 
             with st.spinner(t("loading", lang)):
-                result = analyze_image(image_bytes, mime_type, prompt)
+                result = analyze_image(
+                    image_bytes,
+                    mime_type,
+                    prompt,
+                )
 
             if result.success:
                 _render_analysis(result.text, role)
             else:
                 st.error(f"Analysis failed: {result.text}")
-                st.caption("Your report has still been logged for manual review.")
+                st.caption(
+                    "Your report has still been logged for manual review."
+                )
 
-            _log_incident(role, uploaded.name, result.success)
+            _log_incident(
+                role,
+                uploaded.name,
+                result.success,
+            )
 
 
 def _render_analysis(analysis_text: str, role: str):
     severity = "Unknown"
+
     for line in analysis_text.splitlines():
         if line.upper().startswith("SEVERITY:"):
             severity = line.split(":", 1)[1].strip()
             break
 
     icon = SEVERITY_COLOR.get(severity, "⚪")
+
     st.markdown(f"#### {icon} Severity: {severity}")
+
     st.success(analysis_text)
 
-    if severity in ("Critical", "High") and role in ("Volunteer", "Organizer", "Venue Staff"):
-        st.warning("⚠️ This has been flagged for immediate escalation to the Operations Center.")
+    if (
+        severity.lower() in ("critical", "high")
+        and role in ("Volunteer", "Organizer", "Venue Staff")
+    ):
+        st.warning(
+            "⚠️ This has been flagged for immediate escalation to the Operations Center."
+        )
 
 
 def _log_incident(role: str, filename: str, success: bool):
-    """Session-local incident log — demonstrates role-based audit trail."""
+    """Session-local incident log."""
+
     if "incident_log" not in st.session_state:
         st.session_state.incident_log = []
 
@@ -108,31 +142,53 @@ def _log_incident(role: str, filename: str, success: bool):
 
 
 def render_incident_log(lang: str):
-    """Shown only to Organizer/Staff — audit trail of all reports this session."""
+    """Shown only to Organizer/Staff."""
+
     log = st.session_state.get("incident_log", [])
+
     if not log:
         st.caption("No incidents reported this session.")
         return
 
     st.markdown("#### Incident Log (this session)")
+
     for entry in reversed(log):
-        status = "✅ analyzed" if entry["analyzed"] else "⚠️ analysis failed, needs manual review"
-        st.write(f"`{entry['time']}` — {entry['reported_by']} — {entry['file']} — {status}")
+        status = (
+            "✅ analyzed"
+            if entry["analyzed"]
+            else "⚠️ analysis failed, needs manual review"
+        )
+
+        st.write(
+            f"`{entry['time']}` — "
+            f"{entry['reported_by']} — "
+            f"{entry['file']} — "
+            f"{status}"
+        )
+
+
 def render_incident_chart():
-    import pandas as pd
+    """
+    Uses real session data instead of hardcoded demo values.
+    """
 
     log = st.session_state.get("incident_log", [])
 
     if not log:
         return
 
-    data = {
-        "Low": 1,
-        "Medium": 2,
-        "High": 1,
-        "Critical": 0
+    analyzed = sum(
+        1 for item in log
+        if item["analyzed"]
+    )
+
+    manual_review = len(log) - analyzed
+
+    chart_data = {
+        "Analyzed": analyzed,
+        "Manual Review": manual_review,
     }
 
     st.markdown("### 📊 Incident Analytics")
 
-    st.bar_chart(data)
+    st.bar_chart(chart_data)

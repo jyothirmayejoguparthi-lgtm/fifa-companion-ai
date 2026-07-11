@@ -15,7 +15,6 @@ Design goals (mirrors utils/llm_client.py's reliability pattern):
 """
 
 import os
-import io
 import logging
 import hashlib
 from dataclasses import dataclass
